@@ -1,8 +1,12 @@
 {
   "myContent": "json file as data source",
+  "isLoggedIn": true,
   "users": [
     {
       "name": "First User here"
+    },
+    {
+      "name": "Second user <--"
     }
   ]
 }

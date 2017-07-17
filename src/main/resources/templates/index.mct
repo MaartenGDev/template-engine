@@ -4,7 +4,15 @@
 <p>{{ myContent}}</p>
 
 <ul>
-    {% for users %}
-    <li>{{ name}}</li>
+    {% for user in users %}
+    <li>{{ user.name }}</li>
     {% endfor %}
 </ul>
+
+
+{% if isLoggedIn %}
+<section>
+    Hello there
+</section>
+{% endif %}
+

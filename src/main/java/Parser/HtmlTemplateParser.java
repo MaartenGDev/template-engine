@@ -16,30 +16,37 @@ public class HtmlTemplateParser implements ITemplateParser {
     public String parse(String template, JsonObject parameters) throws NoSuchFieldException {
 
         template = replaceForLoops(template, parameters);
+        template = replaceIfStatements(template, parameters);
         template = replacePlaceholders(template, getKeyValueFromJsonObject(parameters));
 
         return template;
     }
 
     private String replacePlaceholders(String template, Map<String, String> parameters) {
-        Matcher m = Pattern.compile("(\\{\\{ *([a-zA-Z]+) *}})")
+        Matcher m = Pattern.compile("(\\{\\{ *([a-zA-Z.]+) *}})")
                 .matcher(template);
 
         while (m.find()) {
-            template = template.replace(m.group(1), parameters.get(getVariableName(m.group(2))));
+            String placeholder = m.group(1);
+            String variableKey = m.group(2);
+
+            template = template.replace(placeholder, parameters.get(variableKey));
         }
 
         return template;
     }
 
     private String replaceForLoops(String template, JsonObject parameters) throws NoSuchFieldException {
-        Matcher m = Pattern.compile("(\\{% for (\\w+) %}(.*)\\{% endfor %})")
+        Matcher m = Pattern.compile("(\\{% for (\\w+) in (\\w+) %}(.*)\\{% endfor %})")
                 .matcher(template);
 
         while (m.find()) {
             String matchedForLoop = m.group(1);
-            String collectionName = m.group(2);
-            String output = m.group(3).trim();
+            String fieldName = m.group(2);
+            String collectionName = m.group(3);
+            String output = m.group(4).trim();
+
+            StringBuilder forItemBuilder = new StringBuilder();
 
             JsonArray forItems = parameters.getAsJsonArray(collectionName);
 
@@ -51,12 +58,35 @@ public class HtmlTemplateParser implements ITemplateParser {
                 for (String key : currentJsonObject.keySet()) {
                     String value = currentJsonObject.get(key).getAsString();
 
-                    forKeyValuePairs.put(key, value);
+                    forKeyValuePairs.put(fieldName + "." + key, value);
                 }
 
-                template = template.replace(matchedForLoop, replacePlaceholders(output, forKeyValuePairs));
+                forItemBuilder.append(replacePlaceholders(output, forKeyValuePairs));
             }
 
+            template = template.replace(matchedForLoop, forItemBuilder);
+        }
+
+        return template;
+    }
+
+    private String replaceIfStatements(String template, JsonObject parameters) {
+        Matcher m = Pattern.compile("(\\{% if (not )?(\\w+) %}(.*)\\{% endif %})")
+                .matcher(template);
+
+        while (m.find()) {
+            String matchedIfStatement = m.group(1);
+            boolean isNegatedIf = m.group(2) != null;
+            String fieldName = m.group(3);
+            String output = m.group(4);
+
+            boolean parameterBooleanValue = parameters.get(fieldName).getAsBoolean();
+
+            boolean ifStatementEvaluatedToTrue = isNegatedIf != parameterBooleanValue;
+
+            String outputResult = ifStatementEvaluatedToTrue ? replacePlaceholders(output, getKeyValueFromJsonObject(parameters)) : "";
+
+            template = template.replace(matchedIfStatement, outputResult);
         }
 
         return template;
@@ -72,9 +102,5 @@ public class HtmlTemplateParser implements ITemplateParser {
         }
 
         return keyValuePairs;
-    }
-
-    private String getVariableName(String placeholder) {
-        return placeholder.replace("{", "").replace("}", "");
     }
 }
