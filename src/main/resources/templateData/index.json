@@ -1,3 +1,8 @@
 {
-  "myContent": "yeaaa json data"
+  "myContent": "json file as data source",
+  "users": [
+    {
+      "name": "First User here"
+    }
+  ]
 }

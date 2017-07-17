@@ -2,14 +2,14 @@ import FileLocator.TemplateDataFileLocator;
 import FileLocator.TemplateFileLocator;
 import Parser.HtmlTemplateParser;
 import Parser.JsonResourceFileParser;
+import com.google.gson.JsonObject;
 
 import java.io.IOException;
 import java.nio.file.Paths;
-import java.util.Map;
 
 public class Main {
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, NoSuchFieldException {
         String basePath = Paths.get(getProjectRoot()).toString();
 
         TemplateFileLocator templateLocator = new TemplateFileLocator(basePath);
@@ -18,7 +18,7 @@ public class Main {
 
         JsonResourceFileParser resourceFileParser = new JsonResourceFileParser();
 
-        Map<String, String> parameters = resourceFileParser.parse(templateDataFileLocator.get("index.json"));
+        JsonObject parameters = resourceFileParser.parse(templateDataFileLocator.get("index.json"));
 
         HtmlTemplateParser parser = new HtmlTemplateParser();
 

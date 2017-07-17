@@ -1,9 +1,9 @@
 package Parser;
 
-import java.util.Dictionary;
-import java.util.List;
+import com.google.gson.JsonObject;
+
 import java.util.Map;
 
 public interface ITemplateParser {
-    String parse(String template, Map<String, String> parameters);
+    String parse(String template, JsonObject parameters) throws NoSuchFieldException;
 }

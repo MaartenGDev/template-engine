@@ -1,8 +1,7 @@
 package Parser;
 
-import java.nio.file.Path;
-import java.util.Map;
+import com.google.gson.JsonObject;
 
 public interface IResourceFileParser {
-    Map<String, String> parse(String content);
+    JsonObject parse(String content);
 }

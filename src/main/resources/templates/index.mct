@@ -1,4 +1,10 @@
 <h1>hello world</h1>
 
 
-<p>{{myContent}}</p>
+<p>{{ myContent}}</p>
+
+<ul>
+    {% for users %}
+    <li>{{ name}}</li>
+    {% endfor %}
+</ul>
