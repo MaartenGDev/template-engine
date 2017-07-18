@@ -1,6 +1,6 @@
 {
   "myContent": "json file as data source",
-  "isLoggedIn": true,
+  "isLoggedIn": false,
   "isAdmin": false,
   "users": [
     {

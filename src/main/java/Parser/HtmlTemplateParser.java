@@ -71,14 +71,14 @@ public class HtmlTemplateParser implements ITemplateParser {
     }
 
     private String replaceIfStatements(String template, JsonObject parameters) {
-        Matcher m = Pattern.compile("(\\{% if (?:not )?(?:\\w+) %}.*\\{% endif %})")
+        Matcher ifStatements = Pattern.compile("(\\{% if (?:not )?(?:\\w+) %}.*\\{% endif %})")
                 .matcher(template);
 
 
-        while (m.find()) {
-            String ifStatement = m.group();
+        while (ifStatements.find()) {
+            String ifStatement = ifStatements.group();
 
-            Matcher ifGroups = Pattern.compile("(\\{% ((?:else)?(?:if)?) (not )?(\\w+) %})([^{%]+)")
+            Matcher ifGroups = Pattern.compile("(\\{% ((?:else)?(?:if)?) (not )?(?:(\\w+) )?%})([^{%]+)")
                     .matcher(template);
 
             boolean hasFoundTruthyIfStatement = false;
@@ -86,11 +86,13 @@ public class HtmlTemplateParser implements ITemplateParser {
             while (ifGroups.find()) {
                 String ifType = ifGroups.group(2);
                 boolean isNegatedIf = ifGroups.group(3) != null;
+                String ifVariableKey = ifGroups.group(4);
                 String output = ifGroups.group(5);
+                boolean ifTypeIsElse = ifType.equals("else");
 
-                boolean ifRequirementIsTruthy = parameters.get(ifGroups.group(4)).getAsBoolean();
+                boolean ifRequirementIsTruthy =  ifTypeIsElse || parameters.get(ifVariableKey).getAsBoolean();
 
-                boolean evaluatesToTrue = ifType.equals("else") || isNegatedIf != ifRequirementIsTruthy;
+                boolean evaluatesToTrue = ifTypeIsElse || isNegatedIf != ifRequirementIsTruthy;
 
                 if (evaluatesToTrue) {
                     hasFoundTruthyIfStatement = true;
