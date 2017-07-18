@@ -42,7 +42,7 @@ public class Demo{
     }
     
     public void showTitle() throws NoSuchFieldException {
-        JsonObject parameters = resourceFileParser.parse("{name: \"helloWorld\"}");
+        JsonObject parameters = resourceFileParser.parse("{\"name\": \"helloWorld\"}");
 
         String output = templateParser.parse("<h1>{{name}}</h1>", parameters);
 
@@ -50,7 +50,7 @@ public class Demo{
     }  
     
     public void showList() throws NoSuchFieldException {
-        JsonObject parameters = resourceFileParser.parse("{users: [{name: \"First User\"}, {name: \"Second User\"}]}");
+        JsonObject parameters = resourceFileParser.parse("{\"users\": [{\"name\": \"First User\"}, {\"name\": \"Second User\"}]}");
         
         String output = templateParser.parse("<ul>{% for user in users %}<li>{{user.name}}</li>{% endfor %}</ul>", parameters);
         
