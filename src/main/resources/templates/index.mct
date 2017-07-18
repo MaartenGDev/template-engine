@@ -10,9 +10,11 @@
 </ul>
 
 
-{% if isLoggedIn %}
-<section>
-    Hello there
-</section>
+{% if isAdmin %}
+<p>Hello there Admin</p>
+{% elseif isLoggedIn %}
+<p>Hello, you are logged in but not an admin.</p>
+{% else %}
+<p>Hello</p>
 {% endif %}
 

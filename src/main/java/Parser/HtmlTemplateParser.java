@@ -71,22 +71,38 @@ public class HtmlTemplateParser implements ITemplateParser {
     }
 
     private String replaceIfStatements(String template, JsonObject parameters) {
-        Matcher m = Pattern.compile("(\\{% if (not )?(\\w+) %}(.*)\\{% endif %})")
+        Matcher m = Pattern.compile("(\\{% if (?:not )?(?:\\w+) %}.*\\{% endif %})")
                 .matcher(template);
 
+
         while (m.find()) {
-            String matchedIfStatement = m.group(1);
-            boolean isNegatedIf = m.group(2) != null;
-            String fieldName = m.group(3);
-            String output = m.group(4);
+            String ifStatement = m.group();
 
-            boolean parameterBooleanValue = parameters.get(fieldName).getAsBoolean();
+            Matcher ifGroups = Pattern.compile("(\\{% ((?:else)?(?:if)?) (not )?(\\w+) %})([^{%]+)")
+                    .matcher(template);
 
-            boolean ifStatementEvaluatedToTrue = isNegatedIf != parameterBooleanValue;
+            boolean hasFoundTruthyIfStatement = false;
 
-            String outputResult = ifStatementEvaluatedToTrue ? replacePlaceholders(output, getKeyValueFromJsonObject(parameters)) : "";
+            while (ifGroups.find()) {
+                String ifType = ifGroups.group(2);
+                boolean isNegatedIf = ifGroups.group(3) != null;
+                String output = ifGroups.group(5);
 
-            template = template.replace(matchedIfStatement, outputResult);
+                boolean ifRequirementIsTruthy = parameters.get(ifGroups.group(4)).getAsBoolean();
+
+                boolean evaluatesToTrue = ifType.equals("else") || isNegatedIf != ifRequirementIsTruthy;
+
+                if (evaluatesToTrue) {
+                    hasFoundTruthyIfStatement = true;
+                    template = template.replace(ifStatement, replacePlaceholders(output, getKeyValueFromJsonObject(parameters)));
+
+                    break;
+                }
+            }
+
+            if (!hasFoundTruthyIfStatement) {
+                template = template.replace(ifStatement, "");
+            }
         }
 
         return template;
