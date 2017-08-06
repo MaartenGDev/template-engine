@@ -13,16 +13,16 @@ import java.util.regex.Pattern;
 public class HtmlTemplateParser implements ITemplateParser {
 
     @Override
-    public String parse(String template, JsonObject parameters) throws NoSuchFieldException {
+    public String parse(String template, Map<String, Object> parameters) throws NoSuchFieldException {
 
         template = replaceForLoops(template, parameters);
         template = replaceIfStatements(template, parameters);
-        template = replacePlaceholders(template, getKeyValueFromJsonObject(parameters));
+        template = replacePlaceholders(template, parameters);
 
         return template;
     }
 
-    private String replacePlaceholders(String template, Map<String, String> parameters) {
+    private String replacePlaceholders(String template, Map<String, Object> parameters) {
         Matcher m = Pattern.compile("(\\{\\{ *([a-zA-Z.]+) *}})")
                 .matcher(template);
 
@@ -30,13 +30,13 @@ public class HtmlTemplateParser implements ITemplateParser {
             String placeholder = m.group(1);
             String variableKey = m.group(2);
 
-            template = template.replace(placeholder, parameters.get(variableKey));
+            template = template.replace(placeholder, (String) parameters.get(variableKey));
         }
 
         return template;
     }
 
-    private String replaceForLoops(String template, JsonObject parameters) throws NoSuchFieldException {
+    private String replaceForLoops(String template, Map<String, Object> parameters) throws NoSuchFieldException {
         Matcher m = Pattern.compile("(\\{% for (\\w+) in (\\w+) %}(.*)\\{% endfor %})")
                 .matcher(template);
 
@@ -48,12 +48,12 @@ public class HtmlTemplateParser implements ITemplateParser {
 
             StringBuilder forItemBuilder = new StringBuilder();
 
-            JsonArray forItems = parameters.getAsJsonArray(collectionName);
+            JsonArray forItems = (JsonArray) parameters.get(collectionName);
 
             for (JsonElement currentElement : forItems) {
                 JsonObject currentJsonObject = currentElement.getAsJsonObject();
 
-                Map<String, String> forKeyValuePairs = new HashMap<>();
+                Map<String, Object> forKeyValuePairs = new HashMap<>();
 
                 for (String key : currentJsonObject.keySet()) {
                     String value = currentJsonObject.get(key).getAsString();
@@ -70,7 +70,7 @@ public class HtmlTemplateParser implements ITemplateParser {
         return template;
     }
 
-    private String replaceIfStatements(String template, JsonObject parameters) {
+    private String replaceIfStatements(String template, Map<String, Object> parameters) {
         Matcher ifStatements = Pattern.compile("(\\{% if (?:not )?(?:\\w+) %}.*\\{% endif %})")
                 .matcher(template);
 
@@ -90,13 +90,13 @@ public class HtmlTemplateParser implements ITemplateParser {
                 String output = ifGroups.group(5);
                 boolean ifTypeIsElse = ifType.equals("else");
 
-                boolean ifRequirementIsTruthy =  ifTypeIsElse || parameters.get(ifVariableKey).getAsBoolean();
+                boolean ifRequirementIsTruthy =  ifTypeIsElse || (Boolean)parameters.get(ifVariableKey);
 
                 boolean evaluatesToTrue = ifTypeIsElse || isNegatedIf != ifRequirementIsTruthy;
 
                 if (evaluatesToTrue) {
                     hasFoundTruthyIfStatement = true;
-                    template = template.replace(ifStatement, replacePlaceholders(output, getKeyValueFromJsonObject(parameters)));
+                    template = template.replace(ifStatement, replacePlaceholders(output, parameters));
 
                     break;
                 }
@@ -108,17 +108,5 @@ public class HtmlTemplateParser implements ITemplateParser {
         }
 
         return template;
-    }
-
-    private Map<String, String> getKeyValueFromJsonObject(JsonObject jsonObject) {
-        Map<String, String> keyValuePairs = new HashMap<>();
-
-        for (String key : jsonObject.keySet()) {
-            if (!jsonObject.get(key).isJsonArray()) {
-                keyValuePairs.put(key, jsonObject.get(key).getAsString());
-            }
-        }
-
-        return keyValuePairs;
     }
 }

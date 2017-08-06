@@ -6,6 +6,7 @@ import com.google.gson.JsonObject;
 
 import java.io.IOException;
 import java.nio.file.Paths;
+import java.util.Map;
 
 public class Main {
 
@@ -18,7 +19,7 @@ public class Main {
 
         JsonResourceFileParser resourceFileParser = new JsonResourceFileParser();
 
-        JsonObject parameters = resourceFileParser.parse(templateDataFileLocator.get("index.json"));
+        Map<String, Object> parameters = resourceFileParser.parse(templateDataFileLocator.get("index.json"));
 
         HtmlTemplateParser parser = new HtmlTemplateParser();
 

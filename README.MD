@@ -62,7 +62,7 @@ public class Demo{
 ### Basic Variable
 #### Template
 ```html
-<p>{{ myContent}}</p>
+<p>{{ myContent }}</p>
 ```
 #### data
 ```json
