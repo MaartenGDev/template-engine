@@ -48,15 +48,14 @@ public class HtmlTemplateParser implements ITemplateParser {
 
             StringBuilder forItemBuilder = new StringBuilder();
 
-            JsonArray forItems = (JsonArray) parameters.get(collectionName);
+            List<HashMap<String, Object>> forItems =(List<HashMap<String, Object>>) parameters.get(collectionName);;
 
-            for (JsonElement currentElement : forItems) {
-                JsonObject currentJsonObject = currentElement.getAsJsonObject();
 
+            for (HashMap<String, Object> currentElement : forItems) {
                 Map<String, Object> forKeyValuePairs = new HashMap<>();
 
-                for (String key : currentJsonObject.keySet()) {
-                    String value = currentJsonObject.get(key).getAsString();
+                for (String key : currentElement.keySet()) {
+                    String value = (String) currentElement.get(key);
 
                     forKeyValuePairs.put(fieldName + "." + key, value);
                 }
@@ -90,7 +89,7 @@ public class HtmlTemplateParser implements ITemplateParser {
                 String output = ifGroups.group(5);
                 boolean ifTypeIsElse = ifType.equals("else");
 
-                boolean ifRequirementIsTruthy =  ifTypeIsElse || (Boolean)parameters.get(ifVariableKey);
+                boolean ifRequirementIsTruthy = ifTypeIsElse || (Boolean) parameters.get(ifVariableKey);
 
                 boolean evaluatesToTrue = ifTypeIsElse || isNegatedIf != ifRequirementIsTruthy;
 

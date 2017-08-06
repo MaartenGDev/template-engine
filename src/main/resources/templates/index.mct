@@ -1,20 +1,8 @@
 <h1>hello world</h1>
 
 
-<p>{{ myContent}}</p>
-
 <ul>
-    {% for user in users %}
-    <li>{{ user.name }}</li>
+    {% for thread in threads %}
+        <li>{{ thread.name }} - {{ thread.body }}</li>
     {% endfor %}
 </ul>
-
-
-{% if isAdmin %}
-<p>Hello there Admin</p>
-{% elseif isLoggedIn %}
-<p>Hello, you are logged in but not an admin.</p>
-{% else %}
-<p>Hello</p>
-{% endif %}
-

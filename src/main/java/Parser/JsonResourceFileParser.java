@@ -1,11 +1,10 @@
 package Parser;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import com.google.gson.JsonPrimitive;
+import com.google.gson.*;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class JsonResourceFileParser implements IResourceFileParser {
@@ -38,9 +37,29 @@ public class JsonResourceFileParser implements IResourceFileParser {
                 return element.getAsNumber();
             }
         } else if (element.isJsonArray()) {
-            return element.getAsJsonArray();
+            return convertJsonArrayToList(element.getAsJsonArray());
         }
 
-        return element.getAsJsonObject();
+        return convertJsonObjectToMap(element.getAsJsonObject());
+    }
+
+    private List<Object> convertJsonArrayToList(JsonArray jsonArray){
+        List<Object> list = new ArrayList<>();
+
+        for(JsonElement element: jsonArray){
+            list.add(convertJsonObjectToMap(element.getAsJsonObject()));
+        }
+
+        return list;
+    }
+
+    private Map<String, Object> convertJsonObjectToMap(JsonObject jsonObject){
+        Map<String, Object> map = new HashMap<>();
+
+        for(String key : jsonObject.keySet()){
+            map.put(key, getPrimitiveAsObject(jsonObject.get(key)));
+        }
+
+        return map;
     }
 }
