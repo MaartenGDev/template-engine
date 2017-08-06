@@ -1,4 +1,3 @@
-import FileLocator.TemplateDataFileLocator;
 import FileLocator.TemplateFileLocator;
 import Parser.HtmlTemplateParser;
 import Database.Database;
@@ -15,7 +14,7 @@ import java.util.Map;
 
 public class Main {
 
-    public static void main(String[] args) throws IOException, NoSuchFieldException {
+    public static void main(String[] args) throws IOException, NoSuchFieldException, SQLException {
         String basePath = getProjectRoot();
 
         TemplateFileLocator templateLocator = new TemplateFileLocator(basePath);
@@ -44,14 +43,10 @@ public class Main {
 
                 }
                 parameters.put("threads", list);
-
-
             }
-        }catch(SQLException ex){
-
         }
 
-        HtmlTemplateParser parser = new HtmlTemplateParser();
+        HtmlTemplateParser parser = new HtmlTemplateParser(templateLocator);
 
         System.out.println(parser.parse(templateLocator.get("index.mct"), parameters));
     }

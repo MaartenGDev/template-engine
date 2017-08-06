@@ -25,7 +25,7 @@ public class Main {
         // Create instance to parse template from TemplateFileLocator
         HtmlTemplateParser parser = new HtmlTemplateParser();
         // Parse template and fill template with data from resource file found by TemplateDataFileLocator.
-        System.out.println(parser.parse(templateLocator.get("index.mct"), parameters));
+        System.out.println(parser.parse(templateLocator.get(base.mct), parameters));
     }
 }
 ```
