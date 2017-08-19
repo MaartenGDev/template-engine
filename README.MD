@@ -2,62 +2,44 @@
 This is a example Template Engine
 
 
-## Setup
+## Example
 ```java
 public class Main {
 
     public static void main(String[] args) throws IOException, NoSuchFieldException {
-        // The FileLocator use the following path as prefix.
-        String basePath = Paths.get(getProjectRoot()).toString();
+        String basePath = "/path/to/template/files";
 
-        // Locates the templates files. Searches in resources/templates by default.
-        TemplateFileLocator templateLocator = new TemplateFileLocator(basePath);
+        FileLocator templateLocator = new FileLocator(basePath);
 
-        // Locates the resources files for data in the template files. Searches in resources/templateData by default.
-        TemplateDataFileLocator templateDataFileLocator = new TemplateDataFileLocator(basePath);
-        
-        // Parser for the resources files with key value pairs.
-        JsonResourceFileParser resourceFileParser = new JsonResourceFileParser();
+        Map<String, Object> parameters = new HashMap<>();
 
-        // Result of the JsonResourceFileParser.
-        JsonObject parameters = resourceFileParser.parse(templateDataFileLocator.get("index.json"));
-    
-        // Create instance to parse template from TemplateFileLocator
-        HtmlTemplateParser parser = new HtmlTemplateParser();
-        // Parse template and fill template with data from resource file found by TemplateDataFileLocator.
-        System.out.println(parser.parse(templateLocator.get(base.mct), parameters));
+        parameters.put("isLoggedIn", true);
+        List<Map<String, Object>> posts = new ArrayList<>();
+
+        HashMap<String, Object> firstPost = new HashMap<>();
+        firstPost.put("title", "Hello world");
+        firstPost.put("user", "Java Template engine");
+        firstPost.put("date", "2017-12-13");
+        firstPost.put("body", "my post");
+
+        HashMap<String, Object> secondPost = new HashMap<>();
+        secondPost.put("title", "Second First");
+        secondPost.put("user", "Admin");
+        secondPost.put("date", "2017-11-13");
+        secondPost.put("body", "second post");
+
+        posts.add(firstPost);
+        posts.add(secondPost);
+
+        parameters.put("posts", posts);
+
+        HtmlTemplateParser parser = new HtmlTemplateParser(templateLocator);
+
+        System.out.println(parser.parse(templateLocator.get("blog.mct"), parameters));
     }
 }
 ```
 
-## Examples
-```java
-public class Demo{
-    private HtmlTemplateParser templateParser;
-    private JsonResourceFileParser resourceFileParser;
-    
-    public Demo(){
-         templateParser = new HtmlTemplateParser();
-         resourceFileParser = new JsonResourceFileParser();    
-    }
-    
-    public void showTitle() throws NoSuchFieldException {
-        JsonObject parameters = resourceFileParser.parse("{\"name\": \"helloWorld\"}");
-
-        String output = templateParser.parse("<h1>{{name}}</h1>", parameters);
-
-        //output: <h1>helloWorld</h1>
-    }  
-    
-    public void showList() throws NoSuchFieldException {
-        JsonObject parameters = resourceFileParser.parse("{\"users\": [{\"name\": \"First User\"}, {\"name\": \"Second User\"}]}");
-        
-        String output = templateParser.parse("<ul>{% for user in users %}<li>{{user.name}}</li>{% endfor %}</ul>", parameters);
-        
-        //output: <ul><li>First User</li><li>Second User</li></ul>
-    }
-}
-```
 ## Syntax
 ### Basic Variable
 #### Template
@@ -65,10 +47,9 @@ public class Demo{
 <p>{{ myContent }}</p>
 ```
 #### data
-```json
-{
-  "myContent": "HelloWorld"
-}
+```java
+HashMap<String, Object> parameters = new HashMap<>();
+parameters.put("myContent", "Content");
 ```
 #### Result
 ```html
@@ -88,10 +69,9 @@ public class Demo{
 ```
 #### data
 ```json
-{
-  "isAdmin": false,
-  "isLoggedIn": true
-}
+HashMap<String, Object> parameters = new HashMap<>();
+parameters.put("isAdmin", false);
+parameters.put("isLoggedIn", true);
 ```
 #### Result
 ```html
@@ -108,17 +88,22 @@ public class Demo{
 </ul>
 ```
 #### data
-```json
-{
-  "users": [
-    {
-      "name": "First User here"
-    },
-    {
-      "name": "Second User"
-    }
-  ]
-}
+```java
+Map<String, Object> parameters = new HashMap<>();
+List<Map<String, Object>> posts = new ArrayList<>();
+
+HashMap<String, Object> firstPost = new HashMap<>();
+firstPost.put("title", "Hello world");
+firstPost.put("date", "2017-12-13");
+
+HashMap<String, Object> secondPost = new HashMap<>();
+secondPost.put("title", "Second First");
+secondPost.put("date", "2017-11-13");
+
+posts.add(firstPost);
+posts.add(secondPost);
+
+parameters.put("posts", posts);
 ```
 #### Result
 ```html
