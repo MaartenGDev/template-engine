@@ -93,11 +93,11 @@ Map<String, Object> parameters = new HashMap<>();
 List<Map<String, Object>> posts = new ArrayList<>();
 
 HashMap<String, Object> firstPost = new HashMap<>();
-firstPost.put("title", "Hello world");
+firstPost.put("title", "First Post");
 firstPost.put("date", "2017-12-13");
 
 HashMap<String, Object> secondPost = new HashMap<>();
-secondPost.put("title", "Second First");
+secondPost.put("title", "Second Post");
 secondPost.put("date", "2017-11-13");
 
 posts.add(firstPost);
@@ -107,5 +107,5 @@ parameters.put("posts", posts);
 ```
 #### Result
 ```html
-<ul><li>First User here</li><li>Second User</li></ul>
+<ul><li>First Post</li><li>Second Post</li></ul>
 ```

@@ -34,7 +34,7 @@ public class JsonResourceFileParser implements IResourceFileParser {
             } else if (valueType.isString()) {
                 return element.getAsString();
             } else if (valueType.isNumber()) {
-                return element.getAsNumber();
+                return element.getAsInt();
             }
         } else if (element.isJsonArray()) {
             return convertJsonArrayToList(element.getAsJsonArray());

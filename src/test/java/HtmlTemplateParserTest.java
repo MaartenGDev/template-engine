@@ -1,5 +1,4 @@
 import Parser.HtmlTemplateParser;
-import Parser.JsonResourceFileParser;
 import org.junit.Test;
 
 import java.io.IOException;
