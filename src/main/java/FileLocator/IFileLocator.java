@@ -3,5 +3,5 @@ package FileLocator;
 import java.io.IOException;
 
 public interface IFileLocator {
-    String get(String name) throws IOException;
+    String get(String... path) throws IOException;
 }

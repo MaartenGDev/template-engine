@@ -1,4 +1,3 @@
-import FileLocator.TemplateFileLocator;
 import Parser.HtmlTemplateParser;
 import Parser.JsonResourceFileParser;
 import org.junit.Test;
@@ -6,6 +5,8 @@ import org.junit.Test;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.Map;
+
+import FileLocator.FileLocator;
 
 import static junit.framework.TestCase.assertEquals;
 
@@ -17,7 +18,7 @@ public class HtmlTemplateParserTest {
     public HtmlTemplateParserTest() {
         String basePath = getProjectRoot();
 
-        TemplateFileLocator templateLocator = new TemplateFileLocator(basePath);
+        FileLocator templateLocator = new FileLocator(basePath);
 
         templateParser = new HtmlTemplateParser(templateLocator);
         resourceFileParser = new JsonResourceFileParser();

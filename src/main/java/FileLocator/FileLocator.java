@@ -5,7 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-public abstract class FileLocator implements IFileLocator {
+public class FileLocator implements IFileLocator {
     private String basePath;
 
     public FileLocator(String basePath){

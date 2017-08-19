@@ -1,22 +1,20 @@
 package Parser;
 
-import FileLocator.TemplateFileLocator;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.sun.codemodel.internal.JArray;
+import FileLocator.IFileLocator;
+import org.apache.commons.lang.StringEscapeUtils;
 
 import java.io.IOException;
-import java.lang.reflect.Field;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class HtmlTemplateParser implements ITemplateParser {
 
-    private TemplateFileLocator templateLocator;
+    private IFileLocator templateLocator;
 
-    public HtmlTemplateParser(TemplateFileLocator templateLocator) {
+    public HtmlTemplateParser(IFileLocator templateLocator) {
         this.templateLocator = templateLocator;
     }
 
@@ -24,6 +22,8 @@ public class HtmlTemplateParser implements ITemplateParser {
     public String parse(String template, Map<String, Object> parameters) throws NoSuchFieldException, IOException {
 
         template = includeParentTemplate(template);
+        template = includePartials(template);
+        template = replaceContentBlocks(template);
         template = replaceForLoops(template, parameters);
         template = replaceIfStatements(template, parameters);
         template = replacePlaceholders(template, parameters);
@@ -31,8 +31,35 @@ public class HtmlTemplateParser implements ITemplateParser {
         return template;
     }
 
+    private String replaceContentBlocks(String template) {
+        Map<String, ContentBlock> contentBlocks = getContentBlocks(template);
+
+        for(String key : contentBlocks.keySet()){
+            ContentBlock block = contentBlocks.get(key);
+
+            template = template.replace(block.wrapper, block.content);
+        }
+
+        return template;
+    }
+
+    private String includePartials(String template) throws IOException {
+        Matcher m = Pattern.compile("(\\{% include \"?([\\w/]+)\"? %})")
+                .matcher(template);
+
+        while (m.find()) {
+            String wrapper = m.group(1);
+            String partialPath = getTemplateName(m.group(2));
+
+            String partial = this.templateLocator.get(partialPath);
+
+            template = template.replace(wrapper, partial);
+        }
+
+        return template;
+    }
     private String includeParentTemplate(String template) throws IOException {
-        Matcher m = Pattern.compile("(\\{% extends \"([\\w/]+)\" %})")
+        Matcher m = Pattern.compile("(\\{% extends \"?([\\w/]+)\"? %})")
                 .matcher(template);
 
         while (m.find()) {
@@ -46,8 +73,11 @@ public class HtmlTemplateParser implements ITemplateParser {
             Map<String, ContentBlock> childrenBlocks = getContentBlocks(template);
 
             for(String key : parentBlocks.keySet()){
-                template = parentTemplate.replace(parentBlocks.get(key).wrapper, childrenBlocks.get(key).content);
+                Boolean childOverridesBlock = childrenBlocks.containsKey(key);
 
+                String content = childOverridesBlock ? childrenBlocks.get(key).content : parentBlocks.get(key).content;
+
+                template = parentTemplate.replace(parentBlocks.get(key).wrapper, content);
             }
 
             template = template.replace(extendsBlock, "");
@@ -57,7 +87,7 @@ public class HtmlTemplateParser implements ITemplateParser {
     }
 
     private Map<String, ContentBlock> getContentBlocks(String template){
-        Matcher m = Pattern.compile("(\\{% block ([\\w]+) %}(.*)\\{% endblock %})")
+        Matcher m = Pattern.compile("(\\{% ?block \"?([\\w]+)\"? ?%}(.*?)\\{% ?endblock ?%})")
                 .matcher(template);
 
         Map<String, ContentBlock> blocks = new HashMap<>();
@@ -87,7 +117,9 @@ public class HtmlTemplateParser implements ITemplateParser {
             String placeholder = m.group(1);
             String variableKey = m.group(2);
 
-            template = template.replace(placeholder, (String) parameters.get(variableKey));
+            String placeholderValue = StringEscapeUtils.escapeHtml((String) parameters.get(variableKey));
+
+            template = template.replace(placeholder, placeholderValue);
         }
 
         return template;
