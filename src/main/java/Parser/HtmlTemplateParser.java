@@ -31,18 +31,6 @@ public class HtmlTemplateParser implements ITemplateParser {
         return template;
     }
 
-    private String replaceContentBlocks(String template) {
-        Map<String, ContentBlock> contentBlocks = getContentBlocks(template);
-
-        for(String key : contentBlocks.keySet()){
-            ContentBlock block = contentBlocks.get(key);
-
-            template = template.replace(block.wrapper, block.content);
-        }
-
-        return template;
-    }
-
     private String includePartials(String template) throws IOException {
         Matcher m = Pattern.compile("(\\{% include \"?([\\w/]+)\"? %})")
                 .matcher(template);
@@ -58,6 +46,19 @@ public class HtmlTemplateParser implements ITemplateParser {
 
         return template;
     }
+
+    private String replaceContentBlocks(String template) {
+        Map<String, ContentBlock> contentBlocks = getContentBlocks(template);
+
+        for(String key : contentBlocks.keySet()){
+            ContentBlock block = contentBlocks.get(key);
+
+            template = template.replace(block.wrapper, block.content);
+        }
+
+        return template;
+    }
+
     private String includeParentTemplate(String template) throws IOException {
         Matcher m = Pattern.compile("(\\{% extends \"?([\\w/]+)\"? %})")
                 .matcher(template);
@@ -69,7 +70,6 @@ public class HtmlTemplateParser implements ITemplateParser {
             String parentTemplate = this.templateLocator.get(templatePath);
 
             Map<String, ContentBlock> parentBlocks = getContentBlocks(parentTemplate);
-
             Map<String, ContentBlock> childrenBlocks = getContentBlocks(template);
 
             for(String key : parentBlocks.keySet()){
@@ -110,16 +110,18 @@ public class HtmlTemplateParser implements ITemplateParser {
 
 
     private String replacePlaceholders(String template, Map<String, Object> parameters) {
-        Matcher m = Pattern.compile("(\\{\\{ *([a-zA-Z.]+) *}})")
+        Matcher m = Pattern.compile("((\\{)?\\{\\{ *([a-zA-Z.]+) *}}(})?)")
                 .matcher(template);
 
         while (m.find()) {
             String placeholder = m.group(1);
-            String variableKey = m.group(2);
+            boolean contentHasToBeUsedRaw = m.group(2) != null && m.group(4) != null;
+            String variableKey = m.group(3);
+            String placeholderValue = (String) parameters.get(variableKey);
 
-            String placeholderValue = StringEscapeUtils.escapeHtml((String) parameters.get(variableKey));
+            String formattedValue = contentHasToBeUsedRaw ? placeholderValue : StringEscapeUtils.escapeHtml(placeholderValue);
 
-            template = template.replace(placeholder, placeholderValue);
+            template = template.replace(placeholder, formattedValue);
         }
 
         return template;

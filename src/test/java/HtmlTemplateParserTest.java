@@ -38,6 +38,26 @@ public class HtmlTemplateParserTest {
     }
 
     @Test
+    public void placeholderValueGetsEscapedWhenUsingTwoBrackets() throws NoSuchFieldException, IOException {
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("name", "<h1>helloWorld</h1>");
+
+        String output = templateParser.parse("<div>{{name}}</div>", parameters);
+
+        assertEquals("<div>&lt;h1&gt;helloWorld&lt;/h1&gt;</div>", output);
+    }
+
+    @Test
+    public void placeholderValueDoesNotGetEscapedWhenUsingThreeBrackets() throws NoSuchFieldException, IOException {
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("name", "<h1>helloWorld</h1>");
+
+        String output = templateParser.parse("<div>{{{name}}}</div>", parameters);
+
+        assertEquals("<div><h1>helloWorld</h1></div>", output);
+    }
+
+    @Test
     public void ifBlockContentIsOnlyShownWhenTruthy() throws NoSuchFieldException, IOException {
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("isLoggedIn", true);
